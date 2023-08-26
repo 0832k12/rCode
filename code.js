@@ -467,6 +467,20 @@ Code.init = function () {
     function (m, p1, p2) { return p1 + MSG[p2]; });
   var toolboxXml = Blockly.Xml.textToDom(toolboxText);
 
+
+  let currentTheme, theme;
+  const storedDarkMode = localStorage.getItem("darkModeEnabled");
+  if (storedDarkMode == 'true') {
+    currentTheme = "dark";
+    themeIcon.src = "theme-dark.svg"; // 切换为深色主题图标
+    document.body.classList.add("dark-theme"); // 添加深色主题样式
+    theme = Blockly.Themes.DARK_THEME;
+  } else {
+    currentTheme = "light";
+    themeIcon.src = "theme-light.svg"; // 切换为浅色主题图标
+    document.body.classList.remove("dark-theme"); // 移除深色主题样式\
+    theme = Blockly.Themes.LIGHT_THEME;
+  }
   Code.workspace = Blockly.inject('content_blocks',
     {
       grid:
@@ -486,7 +500,7 @@ Code.init = function () {
         controls: true,
         wheel: true
       },
-      theme: Blockly.Themes.LIGHT_THEME
+      theme: theme
     });
 
   // Add to reserved word list: Local variables in execution environment (runJS)
@@ -636,9 +650,12 @@ window.addEventListener('load', Code.init);
 document.addEventListener("DOMContentLoaded", function () {
   const themeToggleButton = document.getElementById("themeToggleButton");
   const themeIcon = document.getElementById("themeIcon");
-
-  let currentTheme = "light"; // 初始主题为浅色
-
+  let currentTheme;
+  if (localStorage.getItem("darkModeEnabled") == 'true') {
+    currentTheme = 'dark';
+  } else {
+    currentTheme = 'light';
+  }
   themeToggleButton.addEventListener("click", function () {
     // 切换主题
     if (currentTheme === "light") {
@@ -652,5 +669,13 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.classList.remove("dark-theme"); // 移除深色主题样式\
       Blockly.getMainWorkspace().setTheme(Blockly.Themes.LIGHT_THEME);
     }
+  });
+  // 获取暗黑模式切换按钮元素
+  const darkModeToggle = document.getElementById("themeToggleButton");
+  // 监听暗黑模式切换按钮的点击事件
+  darkModeToggle.addEventListener("click", function () {
+    document.body.classList.toggle("dark-mode");
+    const isDarkModeEnabled = document.body.classList.contains("dark-mode");
+    localStorage.setItem("darkModeEnabled", isDarkModeEnabled);
   });
 });
