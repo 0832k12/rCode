@@ -20,6 +20,7 @@ var currentLang = position.slice(((position.indexOf('?lang=') + 1 + 6) - 1), pos
 const rCode = Blockly;
 let messageMappings = {};
 let extensionList = [];
+let BuiltinList = ['Console'];
 
 /**
  * Lookup for names of supported languages.  Keys should be in ISO 639 format.
@@ -395,7 +396,7 @@ Code.renderContent = function () {
     extensionElements.forEach(extensionElement => {
       extensionElement.parentNode.removeChild(extensionElement);
     });
-    
+
     for (let i = 0; i < extensionList.length; i++) {
       const extensionElement = xmlDoc.createElement("extension");
       extensionElement.setAttribute("id", extensionList[i]);
@@ -747,27 +748,28 @@ async function loadExtension(id) {
   if (!extensionList.includes(id)) {
     if (id == 'custom')/*加载自定义扩展*/ {
       const extension = await showExtensionModel();
+      console.log('Loading Custom Extension:' + extension)
       if (extension) {
-        const extensionType = typeof extension;
+        const extensionType = extension.indexOf('https://') == 1 || extension.indexOf('http://') == 1;
         switch (extensionType) {
-          case "object":
-            loadExtensionObject(extension);
+          case false:
+            loadExtensionString(extension);
             break;
-          case "string":
+          case true:
             loadExtensionURL(extension);
             break;
         }
       }
     }
     else {
-      if (typeof id == 'object') {
-        loadExtensionObject(id);
+      if (id.indexOf('https://') == 1 || id.indexOf('http://') == 1) {
+        loadExtensionURL(id);
       }
-      else if (id.indexOf('http') == 1) {
-        loadExtensionURL(id)
+      else if (BuiltinList.includes(id)) {
+        loadExtensionID(id);
       }
       else {
-        loadExtensionID(id);
+        loadExtensionString(id);
       }
     }
     if (id != 'custom') {
@@ -775,7 +777,6 @@ async function loadExtension(id) {
     }
   }
   localStorage.setItem("extensionList", JSON.stringify(extensionList))
-
 }
 
 async function showExtensionModel() {
@@ -933,20 +934,30 @@ async function showExtensionModel() {
 
     fileInput.addEventListener('change', (event) => {
       const selectedFile = event.target.files[0];
-
-      // 移除选择框的元素
-      document.body.removeChild(overlay);
-      document.body.removeChild(selectBox);
-      resolve(selectedFile);
+      const reader = new FileReader();
+      let fileContent = '';
+      reader.onload = (event) => {
+        fileContent = event.target.result;
+        document.body.removeChild(overlay);
+        document.body.removeChild(selectBox);
+        resolve(fileContent);
+      };
+      reader.readAsText(selectedFile);
     });
 
     dragDropBox.addEventListener('drop', (e) => {
       e.preventDefault();
       const file = e.dataTransfer.files[0];
-      // 移除选择框的元素
-      document.body.removeChild(overlay);
-      document.body.removeChild(selectBox);
-      resolve(file);
+      const reader = new FileReader();
+      let fileContent = '';
+      reader.onload = (event) => {
+        fileContent = event.target.result;
+        document.body.removeChild(overlay);
+        document.body.removeChild(selectBox);
+        resolve(fileContent);
+      };
+
+      reader.readAsText(file);
     });
 
     // 绑定上传按钮事件
@@ -990,13 +1001,19 @@ async function loadExtensionURL(url) {
     executeExtension();
     toolboxXml.innerHTML = BlockInfo;
     Code.workspace.updateToolbox(toolboxXml);
+    extensionList.push(url);
   } catch (error) {
     console.error('Error loading extension:', error);
   }
 }
 
-function loadExtensionObject(object) {
-  console.log(JSON.stringify(object))
+function loadExtensionString(string) {
+  const executeExtension = new Function(string);
+  BlockInfo = toolboxXml.innerHTML;
+  executeExtension();
+  toolboxXml.innerHTML = BlockInfo;
+  Code.workspace.updateToolbox(toolboxXml);
+  extensionList.push(string);
 }
 
 function loadExtensionID(id) {
