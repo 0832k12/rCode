@@ -317,6 +317,19 @@ Code.tabClick = function (clickedName) {
     }
     if (xmlDom) {
       Code.workspace.clear();
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlTextarea.value, "application/xml");
+
+      // 获取所有的 <extension> 元素
+      const extensionElements = xmlDoc.querySelectorAll("extension");
+
+      // 遍历每个 <extension> 元素并加载
+      extensionElements.forEach(extensionElement => {
+        const extensionId = extensionElement.getAttribute("id");
+        if (extensionId) {
+          loadExtension(extensionId);
+        }
+      });
       Blockly.Xml.domToWorkspace(xmlDom, Code.workspace);
     }
   }
@@ -371,6 +384,26 @@ Code.renderContent = function () {
     var xmlTextarea = document.getElementById('content_xml');
     var xmlDom = Blockly.Xml.workspaceToDom(Code.workspace);
     var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+    // 将XML字符串解析为DOM文档
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+    // 获取所有的 <extension> 元素
+    const extensionElements = xmlDoc.querySelectorAll("extension");
+
+    // 从文档中删除每个 <extension> 元素
+    extensionElements.forEach(extensionElement => {
+      extensionElement.parentNode.removeChild(extensionElement);
+    });
+    
+    for (let i = 0; i < extensionList.length; i++) {
+      const extensionElement = xmlDoc.createElement("extension");
+      extensionElement.setAttribute("id", extensionList[i]);
+
+      const rootElement = xmlDoc.documentElement;
+      rootElement.appendChild(extensionElement);
+    }
+    xmlText = new XMLSerializer().serializeToString(xmlDoc);
     xmlTextarea.value = xmlText;
     xmlTextarea.focus();
   } else if (content.id == 'content_javascript') {
@@ -711,7 +744,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 async function loadExtension(id) {
-  if (!extensionList.includes(id)) 
+  if (!extensionList.includes(id)) {
     if (id == 'custom')/*加载自定义扩展*/ {
       const extension = await showExtensionModel();
       if (extension) {
@@ -737,10 +770,12 @@ async function loadExtension(id) {
         loadExtensionID(id);
       }
     }
-    if(id != 'custom')
+    if (id != 'custom') {
       extensionList.push(id);
-    localStorage.setItem("extensionList", JSON.stringify(extensionList))
-  
+    }
+  }
+  localStorage.setItem("extensionList", JSON.stringify(extensionList))
+
 }
 
 async function showExtensionModel() {
@@ -951,7 +986,9 @@ async function loadExtensionURL(url) {
 
     // Using Function constructor to execute the fetched extension code
     const executeExtension = new Function(extensionCode);
+    BlockInfo = toolboxXml.innerHTML;
     executeExtension();
+    toolboxXml.innerHTML = BlockInfo;
     Code.workspace.updateToolbox(toolboxXml);
   } catch (error) {
     console.error('Error loading extension:', error);
