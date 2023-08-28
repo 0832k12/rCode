@@ -672,20 +672,14 @@ document.addEventListener("DOMContentLoaded", function () {
       themeIcon.src = "theme-dark.svg"; // 切换为深色主题图标
       document.body.classList.add("dark-theme"); // 添加深色主题样式
       Blockly.getMainWorkspace().setTheme(Blockly.Themes.DARK_THEME);
+      localStorage.setItem("darkModeEnabled", true);
     } else {
       currentTheme = "light";
       themeIcon.src = "theme-light.svg"; // 切换为浅色主题图标
       document.body.classList.remove("dark-theme"); // 移除深色主题样式\
       Blockly.getMainWorkspace().setTheme(Blockly.Themes.LIGHT_THEME);
+      localStorage.setItem("darkModeEnabled", false);
     }
-  });
-  // 获取暗黑模式切换按钮元素
-  const darkModeToggle = document.getElementById("themeToggleButton");
-  // 监听暗黑模式切换按钮的点击事件
-  darkModeToggle.addEventListener("click", function () {
-    document.body.classList.toggle("dark-mode");
-    const isDarkModeEnabled = document.body.classList.contains("dark-mode");
-    localStorage.setItem("darkModeEnabled", isDarkModeEnabled);
   });
 
   // 获取按钮和扩展页面元素
@@ -717,7 +711,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 async function loadExtension(id) {
-  if (!extensionList.includes(id)) {
+  if (!extensionList.includes(id)) 
     if (id == 'custom')/*加载自定义扩展*/ {
       const extension = await showExtensionModel();
       if (extension) {
@@ -743,9 +737,10 @@ async function loadExtension(id) {
         loadExtensionID(id);
       }
     }
-    extensionList.push(id);
+    if(id != 'custom')
+      extensionList.push(id);
     localStorage.setItem("extensionList", JSON.stringify(extensionList))
-  }
+  
 }
 
 async function showExtensionModel() {
