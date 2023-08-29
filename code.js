@@ -18,9 +18,8 @@ var toolboxXml, BlockInfo;
 const position = window.location.href;
 var currentLang = position.slice(((position.indexOf('?lang=') + 1 + 6) - 1), position.length);
 const rCode = Blockly;
-let messageMappings = {};
 let extensionList = [];
-let BuiltinList = ['Console'];
+let BuiltinList = ['Console', 'Div'];
 
 /**
  * Lookup for names of supported languages.  Keys should be in ISO 639 format.
@@ -648,7 +647,7 @@ Code.initLanguage = function () {
 
 /**
  * Execute the user's code.
- * Just a quick and dirty eval.  Catch infinite loops.
+ * Just a quick eval. Catch infinite loops.
  * eval => Function! (0832)
  */
 Code.runJS = function () {
@@ -996,9 +995,25 @@ async function loadExtensionURL(url) {
     const extensionCode = await fetchExtension(url);
 
     // Using Function constructor to execute the fetched extension code
-    const executeExtension = new Function(extensionCode);
+    let messageMappings;
+    function formatMessage({ id }) {
+      const langMappings = messageMappings[currentLang] || {};
+      const defaultMappings = messageMappings['default'] || {};
+  
+      if (langMappings.hasOwnProperty(id)) {
+        return langMappings[id];
+      } else if (defaultMappings.hasOwnProperty(id)) {
+        return defaultMappings[id];
+      } else {
+        return id; // 返回原始消息
+      }
+    }
+  
+    function setformatMessage(mappings) {
+      messageMappings = mappings;
+    }
     BlockInfo = toolboxXml.innerHTML;
-    executeExtension();
+    eval(extensionCode);
     toolboxXml.innerHTML = BlockInfo;
     Code.workspace.updateToolbox(toolboxXml);
     extensionList.push(url);
@@ -1008,9 +1023,25 @@ async function loadExtensionURL(url) {
 }
 
 function loadExtensionString(string) {
-  const executeExtension = new Function(string);
+  let messageMappings;
+  function formatMessage({ id }) {
+    const langMappings = messageMappings[currentLang] || {};
+    const defaultMappings = messageMappings['default'] || {};
+
+    if (langMappings.hasOwnProperty(id)) {
+      return langMappings[id];
+    } else if (defaultMappings.hasOwnProperty(id)) {
+      return defaultMappings[id];
+    } else {
+      return id; // 返回原始消息
+    }
+  }
+
+  function setformatMessage(mappings) {
+    messageMappings = mappings;
+  }
   BlockInfo = toolboxXml.innerHTML;
-  executeExtension();
+  eval(string);
   toolboxXml.innerHTML = BlockInfo;
   Code.workspace.updateToolbox(toolboxXml);
   extensionList.push(string);
@@ -1019,70 +1050,389 @@ function loadExtensionString(string) {
 function loadExtensionID(id) {
   const extension = id;
   BlockInfo = toolboxXml.innerHTML;
-  if (extension == 'Console')
+  let messageMappings;
+  function formatMessage({ id }) {
+    const langMappings = messageMappings[currentLang] || {};
+    const defaultMappings = messageMappings['default'] || {};
+
+    if (langMappings.hasOwnProperty(id)) {
+      return langMappings[id];
+    } else if (defaultMappings.hasOwnProperty(id)) {
+      return defaultMappings[id];
+    } else {
+      return id; // 返回原始消息
+    }
+  }
+
+  function setformatMessage(mappings) {
+    messageMappings = mappings;
+  }
+
+  const Console_Extension = function () {
+    // 设置本地化消息
+    setformatMessage({
+      'zh-hans': {
+        'name': '控制台',
+        'log': '输出 %1',
+        'warn': '警告 %1',
+        'error': '错误 %1',
+        'clear': '清除控制台'
+      },
+      'default': {
+        'name': 'Console',
+        'log': 'Log %1',
+        'warn': 'Warn %1',
+        'error': 'Error %1',
+        'clear': 'Clear Console'
+      }
+    }, 'Console');
+
+    // 定义“输出”块
+    rCode.Blocks['console_log'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "console_log",
+          "message0": formatMessage({ id: 'log' }),
+          "args0": [
+            {
+              "type": "input_value",
+              "name": "MESSAGE",
+            }
+          ],
+          "previousStatement": null,
+          "nextStatement": null,
+          "colour": 230
+        });
+      }
+    };
+
+    // 定义“警告”块
+    rCode.Blocks['console_warn'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "console_warn",
+          "message0": formatMessage({ id: 'warn' }),
+          "args0": [
+            {
+              "type": "input_value",
+              "name": "MESSAGE",
+            }
+          ],
+          "previousStatement": null,
+          "nextStatement": null,
+          "colour": 230
+        });
+      }
+    };
+
+    // 定义“错误”块
+    rCode.Blocks['console_error'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "console_error",
+          "message0": formatMessage({ id: 'error' }),
+          "args0": [
+            {
+              "type": "input_value",
+              "name": "MESSAGE",
+            }
+          ],
+          "previousStatement": null,
+          "nextStatement": null,
+          "colour": 230
+        });
+      }
+    };
+
+    // 定义“清除控制台”块
+    rCode.Blocks['console_clear'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "console_clear",
+          "message0": formatMessage({ id: 'clear' }),
+          "previousStatement": null,
+          "nextStatement": null,
+          "colour": 230
+        });
+      }
+    };
+
+    // JavaScript 生成函数
+    rCode.JavaScript['console_log'] = function (block) {
+      var inputValue = rCode.JavaScript.valueToCode(block, 'MESSAGE', rCode.JavaScript.ORDER_ATOMIC);
+      var code = 'console.log(' + inputValue + ');\n';
+      return code;
+    };
+
+    rCode.JavaScript['console_warn'] = function (block) {
+      var inputValue = rCode.JavaScript.valueToCode(block, 'MESSAGE', rCode.JavaScript.ORDER_ATOMIC);
+      var code = 'console.warn(' + inputValue + ');\n';
+      return code;
+    };
+
+    rCode.JavaScript['console_error'] = function (block) {
+      var inputValue = rCode.JavaScript.valueToCode(block, 'MESSAGE', rCode.JavaScript.ORDER_ATOMIC);
+      var code = 'console.error(' + inputValue + ');\n';
+      return code;
+    };
+
+    rCode.JavaScript['console_clear'] = function (block) {
+      var code = 'console.clear();\n';
+      return code;
+    };
+
+    // 在 BlockInfo 中添加块和类别
+    BlockInfo +=
+      `<category name="${formatMessage({ id: 'name' })}" colour="120">
+    <block type="console_log">
+      <value name="MESSAGE">
+        <shadow type="text">
+          <field name="TEXT">Hello, World!</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="console_warn">
+      <value name="MESSAGE">
+        <shadow type="text">
+          <field name="TEXT">Warning Message</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="console_error">
+      <value name="MESSAGE">
+        <shadow type="text">
+          <field name="TEXT">Error Message</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="console_clear"></block>
+  </category>`;
+  }
+  const Div_Extension = function () {
+    // 设置本地化消息
+    setformatMessage({
+      'zh-hans': {
+        'name': 'Div元素',
+        'create_div': '创建DIV元素',
+        'set_text': '设置 %1 的文本为 %2',
+        'set_color': '设置 %1 的颜色为 %2',
+        'set_style': '设置 %1 的样式属性 %2 为 %3',
+        'remove_div': '移除 %1 元素'
+      },
+      'default': {
+        'name': 'Div',
+        'create_div': 'Create DIV Element',
+        'set_text': 'Set Text of %1 to %2',
+        'set_color': 'Set Color of %1 to %2',
+        'set_style': 'Set Style Property %2 of %1 to %3',
+        'remove_div': 'Remove %1 Element'
+      }
+    });
+    // 定义“创建DIV元素”块
+    rCode.Blocks['create_div'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "create_div",
+          "message0": formatMessage({ id: 'create_div' }),
+          "output": "Element",
+          "colour": 160
+        });
+      }
+    };
+    // 定义“设置文本”块
+    rCode.Blocks['set_text'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "set_text",
+          "message0": formatMessage({ id: 'set_text' }),
+          "args0": [
+            {
+              "type": "field_variable",
+              "name": "DIV_VARIABLE",
+              "check": "Variable"
+            },
+            {
+              "type": "input_value",
+              "name": "TEXT",
+            }
+          ],
+          "previousStatement": null,
+          "nextStatement": null,
+          "colour": 160
+        });
+      }
+    };
+
+    // 定义“设置颜色”块
+    rCode.Blocks['set_color'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "set_color",
+          "message0": formatMessage({ id: 'set_color' }),
+          "args0": [
+            {
+              "type": "field_variable",
+              "name": "DIV_VARIABLE",
+              "check": "Variable"
+            },
+            {
+              "type": "input_value",
+              "name": "COLOR",
+              "check": "Colour"
+            }
+          ],
+          "previousStatement": null,
+          "nextStatement": null,
+          "colour": 160
+        });
+      }
+    };
+    // 定义返回型块，返回样式属性列表
+    Blockly.Blocks['get_style_properties'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "get_style_properties",
+          "message0": formatMessage({ id: 'get_style_properties' }),
+          "output": "String",
+          "colour": 230
+        });
+      }
+    };
+    // 定义“设置样式”块
+    rCode.Blocks['set_style'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "set_style",
+          "message0": formatMessage({ id: 'set_style' }),
+          "args0": [
+            {
+              "type": "field_variable",
+              "name": "DIV_VARIABLE",
+              "check": "Variable"
+            },
+            {
+              "type": "field_dropdown",
+              "name": "STYLE_PROPERTY",
+              "options": [
+                ["background-color", "background-color"],
+                ["color", "color"],
+                ["font-size", "font-size"],
+                ["font-family", "font-family"],
+                ["border", "border"],
+                ["margin", "margin"],
+                ["padding", "padding"],
+                ["text-align", "text-align"],
+                ["width", "width"],
+                ["height", "height"],
+                ["border-radius", "border-radius"],
+              ]
+            },
+            {
+              "type": "input_value",
+              "name": "STYLE_VALUE",
+              "check": "String"
+            }
+          ],
+          "previousStatement": null,
+          "nextStatement": null,
+          "colour": 160
+        });
+      }
+    };
+    // 定义“移除DIV元素”块
+    rCode.Blocks['remove_div'] = {
+      init: function () {
+        this.jsonInit({
+          "type": "remove_div",
+          "message0": formatMessage({ id: 'remove_div' }),
+          "args0": [
+            {
+              "type": "field_variable",
+              "name": "DIV_VARIABLE",
+              "check": "Variable"
+            }
+          ],
+          "previousStatement": null,
+          "nextStatement": null,
+          "colour": 160
+        });
+      }
+    };
+    // JavaScript 生成函数
+    rCode.JavaScript['create_div'] = function (block) {
+      var code = 'document.createElement("div")';
+      return [code, rCode.JavaScript.ORDER_ATOMIC];
+    };
+    rCode.JavaScript['set_text'] = function (block) {
+      var divVariable = rCode.JavaScript.nameDB_.getName(block.getFieldValue('DIV_VARIABLE'), rCode.Variables.NAME_TYPE);
+      var textValue = rCode.JavaScript.valueToCode(block, 'TEXT', rCode.JavaScript.ORDER_ATOMIC);
+      var code = divVariable + '.innerText = ' + textValue + ';\n';
+      return code;
+    };
+
+    rCode.JavaScript['set_color'] = function (block) {
+      var divVariable = rCode.JavaScript.nameDB_.getName(block.getFieldValue('DIV_VARIABLE'), rCode.Variables.NAME_TYPE);
+      var colorValue = block.getFieldValue('COLOR');
+      var code = divVariable + '.style.color = "' + colorValue + '";\n';
+      return code;
+    };
+    // JavaScript 生成函数
+    Blockly.JavaScript['get_style_properties'] = function (block) {
+      var code = '["background-color", "color", "font-size", "font-family", "border", "margin", "padding", "text-align", "width", "height", "border-radius", "box-shadow", "text-decoration", "opacity"]';
+      return [code, Blockly.JavaScript.ORDER_NONE];
+    };
+    // JavaScript 生成函数
+    rCode.JavaScript['set_style'] = function (block) {
+      var divVariable = rCode.JavaScript.variableDB_.getName(block.getFieldValue('DIV_VARIABLE'), rCode.Variables.NAME_TYPE);
+      var styleProperty = rCode.JavaScript.valueToCode(block, 'STYLE_PROPERTY', rCode.JavaScript.ORDER_ATOMIC);
+      var styleValue = rCode.JavaScript.valueToCode(block, 'STYLE_VALUE', rCode.JavaScript.ORDER_ATOMIC);
+      var code = divVariable + '.style[' + styleProperty + '] = ' + styleValue + ';\n';
+      return code;
+    };
+
+    rCode.JavaScript['remove_div'] = function (block) {
+      var divVariable = rCode.JavaScript.nameDB_.getName(block.getFieldValue('DIV_VARIABLE'), rCode.Variables.NAME_TYPE);
+      var code = divVariable + '.remove();\n';
+      return code;
+    };
+    BlockInfo +=
+      `<category name="${formatMessage({ id: 'name' })}" colour="120">
+<block type="create_div"></block>
+<block type="set_text">
+<value name="TEXT">
+  <shadow type="text">
+    <field name="TEXT">Hello, World!</field>
+  </shadow>
+</value>
+</block>
+<block type="set_color">
+<value name="COLOR">
+  <shadow type="colour_picker">
+    <field name="COLOUR">#ff0000</field>
+  </shadow>
+</value>
+</block>
+<block type="set_style">
+<value name="STYLE_PROPERTY">
+  <shadow type="field_dropdown">
+    <field name="STYLE_PROPERTY">background-color</field>
+  </shadow>
+</value>
+<value name="STYLE_VALUE">
+  <shadow type="text">
+    <field name="TEXT">#ffffff</field>
+  </shadow>
+</value>
+</block>
+<block type="remove_div"></block>
+</category>`;
+  }
+  if (extension == 'Console') {
     Console_Extension();
+  }
+  else if (extension == 'Div') {
+    Div_Extension();
+  }
   toolboxXml.innerHTML = BlockInfo;
   Code.workspace.updateToolbox(toolboxXml);
-}
-
-function formatMessage({ id }) {
-  const langMappings = messageMappings[currentLang] || {};
-  const defaultMappings = messageMappings['default'] || {};
-
-  if (langMappings.hasOwnProperty(id)) {
-    return langMappings[id];
-  } else if (defaultMappings.hasOwnProperty(id)) {
-    return defaultMappings[id];
-  } else {
-    return id; // 返回原始消息
-  }
-}
-
-function setformatMessage(mappings) {
-  messageMappings = mappings;
-}
-
-const Console_Extension = function () {
-  setformatMessage({
-    'zh-hans': {
-      'name': '控制台',
-      'log': '输出 %1'
-    },
-    'default': {
-      'name': 'Console',
-      'log': 'Log %1'
-    }
-  });
-  rCode.Blocks['console_log'] = {
-    init: function () {
-      this.jsonInit({
-        "type": "console_log",
-        "message0": formatMessage({ id: 'log' }),
-        "args0": [
-          {
-            "type": "input_value",
-            "name": "MESSAGE",
-          }
-        ],
-        "previousStatement": null,
-        "nextStatement": null,
-        "colour": 230
-      });
-    }
-  }
-  rCode.JavaScript['console_log'] = function (block) {
-    var inputValue = rCode.JavaScript.valueToCode(block, 'MESSAGE', rCode.JavaScript.ORDER_ATOMIC);
-    var code = 'console.log(' + inputValue + ');\n';
-    return code;
-  };
-  BlockInfo +=
-    `<category name="${formatMessage({ id: 'name' })}" colour="120">
-      <block type="console_log">
-        <value name="MESSAGE">
-          <shadow type="text">
-            <field name="TEXT">0832!</field>
-          </shadow>
-        </value>
-      </block>
-    </category>`;
 }

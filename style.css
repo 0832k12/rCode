@@ -355,3 +355,26 @@ button {
     opacity: 1;
   }
 }
+
+.language-bar {
+  padding: 5px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 5px;
+  margin-top: 5px;
+  color: white;
+}
+/* 不同编程语言的颜色 */
+.language-bar.JavaScript {
+  background-color: #f0db4f; /* JavaScript 对应的颜色 */
+}
+
+.language-bar.Python {
+  background-color: #3572A5; /* Python 对应的颜色 */
+}
+
+.language-bar.Java {
+  background-color: #007396; /* Java 对应的颜色 */
+}
+
+/* 添加其他编程语言的样式... */

@@ -2,8 +2,9 @@ const language = getLanguageFromUrl(); // 从网址获取语言环境
 const translations = getTranslationsForLanguage(language); // 根据语言环境获取翻译文本
 
 const extensions = [
-    { id: 'custom',name: translations.customName, description: translations.customDescription, image: "./extensions/custom/custom.svg"},
-    { id: 'Console',name: translations.ConsoleName, description: translations.ConsoleDescription, author: translations.ConsoleAuthor, image: "./extensions/Console/Console.svg" },
+    { id: 'custom', name: translations.customName, description: translations.customDescription, image: "./extensions/custom/custom.svg" },
+    { id: 'Console', name: translations.ConsoleName, description: translations.ConsoleDescription, author: translations.ConsoleAuthor, image: "./extensions/Console/Console.svg", programmingLanguages: ['JavaScript'] },
+    { id: 'Div', name: translations.DivName, description: translations.DivDescription, author: translations.DivAuthor, image: "./extensions/Div/Div.svg", programmingLanguages: ['JavaScript'] },
     // 添加更多展示项的数据...
 ];
 
@@ -24,8 +25,22 @@ extensions.forEach(extension => {
     const descriptionElement = document.createElement('p');
     descriptionElement.textContent = extension.description;
 
+    const languageBarElement = document.createElement('div');
+    languageBarElement.classList.add('language-bar');
+
+    if (extension.programmingLanguages) {
+        for (let j = 0; j < extension.programmingLanguages.length; j++) {
+            const language = extension.programmingLanguages[j];
+            languageBarElement.classList.add(language);
+        }
+        
+    languageBarElement.textContent = `${translations.languageSupport}: ${extension.programmingLanguages.join(', ')}`;
+    // 添加编程语言栏元素到扩展项
+    extensionItem.appendChild(languageBarElement);
+    }
+
     const authorElement = document.createElement('p');
-    if(extension.author)
+    if (extension.author)
         authorElement.textContent = `${translations.authorLabel}: ${extension.author}`;
 
     extensionItem.appendChild(imageElement);
@@ -50,7 +65,11 @@ function getTranslationsForLanguage(language) {
             ConsoleName: 'Console',
             ConsoleDescription: '控制台控制！',
             ConsoleAuthor: '0832',
-            authorLabel: '作者'
+            DivName: 'Div元素',
+            DivDescription: '控制Div元素！',
+            DivAuthor: '0832',
+            authorLabel: '作者',
+            languageSupport: '编译支持'
         };
     } else {
         return {
@@ -60,6 +79,9 @@ function getTranslationsForLanguage(language) {
             ConsoleName: 'Console',
             ConsoleDescription: 'Console controls!',
             ConsoleAuthor: '0832',
+            DivName: 'Div',
+            DivDescription: 'Control Divs!',
+            DivAuthor: '0832',
             authorLabel: 'Author'
         };
     }
