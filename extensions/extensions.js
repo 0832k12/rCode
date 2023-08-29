@@ -82,7 +82,8 @@ function getTranslationsForLanguage(language) {
             DivName: 'Div',
             DivDescription: 'Control Divs!',
             DivAuthor: '0832',
-            authorLabel: 'Author'
+            authorLabel: 'Author',
+            languageSupport: 'Compile support'
         };
     }
 }
