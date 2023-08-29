@@ -1249,7 +1249,7 @@ function loadExtensionID(id) {
             {
               "type": "field_variable",
               "name": "DIV_VARIABLE",
-              "check": "Variable"
+              "variable": "i"
             },
             {
               "type": "input_value",
@@ -1273,7 +1273,7 @@ function loadExtensionID(id) {
             {
               "type": "field_variable",
               "name": "DIV_VARIABLE",
-              "check": "Variable"
+              "variable": "i"
             },
             {
               "type": "input_value",
@@ -1287,17 +1287,6 @@ function loadExtensionID(id) {
         });
       }
     };
-    // 定义返回型块，返回样式属性列表
-    Blockly.Blocks['get_style_properties'] = {
-      init: function () {
-        this.jsonInit({
-          "type": "get_style_properties",
-          "message0": formatMessage({ id: 'get_style_properties' }),
-          "output": "String",
-          "colour": 230
-        });
-      }
-    };
     // 定义“设置样式”块
     rCode.Blocks['set_style'] = {
       init: function () {
@@ -1308,7 +1297,7 @@ function loadExtensionID(id) {
             {
               "type": "field_variable",
               "name": "DIV_VARIABLE",
-              "check": "Variable"
+              "variable": "i"
             },
             {
               "type": "field_dropdown",
@@ -1349,7 +1338,7 @@ function loadExtensionID(id) {
             {
               "type": "field_variable",
               "name": "DIV_VARIABLE",
-              "check": "Variable"
+              "variable": "i"
             }
           ],
           "previousStatement": null,
@@ -1375,11 +1364,6 @@ function loadExtensionID(id) {
       var colorValue = block.getFieldValue('COLOR');
       var code = divVariable + '.style.color = "' + colorValue + '";\n';
       return code;
-    };
-    // JavaScript 生成函数
-    Blockly.JavaScript['get_style_properties'] = function (block) {
-      var code = '["background-color", "color", "font-size", "font-family", "border", "margin", "padding", "text-align", "width", "height", "border-radius", "box-shadow", "text-decoration", "opacity"]';
-      return [code, Blockly.JavaScript.ORDER_NONE];
     };
     // JavaScript 生成函数
     rCode.JavaScript['set_style'] = function (block) {
