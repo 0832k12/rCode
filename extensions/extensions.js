@@ -5,6 +5,7 @@ const extensions = [
     { id: 'custom', name: translations.customName, description: translations.customDescription, image: "./extensions/custom/custom.svg" },
     { id: 'Console', name: translations.ConsoleName, description: translations.ConsoleDescription, author: translations.ConsoleAuthor, image: "./extensions/Console/Console.svg", programmingLanguages: ['JavaScript'] },
     { id: 'Div', name: translations.DivName, description: translations.DivDescription, author: translations.DivAuthor, image: "./extensions/Div/Div.svg", programmingLanguages: ['JavaScript'] },
+    { id: 'Debug', name: translations.DebugName, description: translations.DebugDescription, author: translations.DebugAuthor, image: "./extensions/Debug/Debug.svg", programmingLanguages: ['JavaScript'] },
     // 添加更多展示项的数据...
 ];
 
@@ -62,12 +63,15 @@ function getTranslationsForLanguage(language) {
             customName: '自定义扩展',
             customDescription: '从URL上传扩展',
             customAuthor: '0832',
-            ConsoleName: 'Console',
+            ConsoleName: '控制台',
             ConsoleDescription: '控制台控制！',
             ConsoleAuthor: '0832',
             DivName: 'Div元素',
             DivDescription: '控制Div元素！',
             DivAuthor: '0832',
+            DebugName: '调试执行',
+            DebugDescription: '在代码中执行代码。',
+            DebugAuthor: '0832',
             authorLabel: '作者',
             languageSupport: '编译支持'
         };
@@ -82,6 +86,9 @@ function getTranslationsForLanguage(language) {
             DivName: 'Div',
             DivDescription: 'Control Divs!',
             DivAuthor: '0832',
+            DebugName: 'Debug Execution',
+            DebugDescription: 'Coding in code.',
+            DebugAuthor: '0832',
             authorLabel: 'Author',
             languageSupport: 'Compile support'
         };
