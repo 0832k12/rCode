@@ -15,6 +15,7 @@
  */
 var Code = {};
 var toolboxXml, BlockInfo;
+var secLoad = false;
 const position = window.location.href;
 var currentLang = position.slice(((position.indexOf('?lang=') + 1 + 6) - 1), position.length);
 const rCode = Blockly;
@@ -168,13 +169,16 @@ Code.loadBlocks = function (defaultXml) {
     // An href with #key trigers an AJAX call to retrieve saved blocks.
     BlocklyStorage.retrieveXml(window.location.hash.substring(1));
   } else if (loadOnce) {
+    secLoad = true;
     // Language switching stores the blocks during the reload.
     delete window.sessionStorage.loadOnceBlocks;
     var xml = Blockly.Xml.textToDom(loadOnce);
-    const extensionListLoad = JSON.parse(localStorage.getItem("extensionList"));
-    if (extensionListLoad.length > 0) {
-      for (const extension of extensionListLoad) {
-        loadExtension(extension);
+    if (localStorage.getItem("rC:noExtension") == 'false') {
+      const extensionListLoad = JSON.parse(localStorage.getItem("rC:extensionList"));
+      if (extensionListLoad.length > 0) {
+        for (const extension of extensionListLoad) {
+          loadExtension(extension);
+        }
       }
     }
     Blockly.Xml.domToWorkspace(xml, Code.workspace);
@@ -186,6 +190,10 @@ Code.loadBlocks = function (defaultXml) {
     // Restore saved blocks in a separate thread so that subsequent
     // initialization is not affected from a failed load.
     window.setTimeout(BlocklyStorage.restoreBlocks, 0);
+  }
+  if (secLoad == false) {
+    localStorage.setItem('rC:noExtension', 'true')
+    localStorage.setItem('rC:extensionList', '')
   }
 };
 
@@ -514,7 +522,7 @@ Code.init = function () {
 
 
   let currentTheme, theme;
-  const storedDarkMode = localStorage.getItem("darkModeEnabled");
+  const storedDarkMode = localStorage.getItem("rC:darkModeEnabled");
   if (storedDarkMode == 'true') {
     currentTheme = "dark";
     themeIcon.src = "theme-dark.svg"; // 切换为深色主题图标
@@ -693,7 +701,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const themeToggleButton = document.getElementById("themeToggleButton");
   const themeIcon = document.getElementById("themeIcon");
   let currentTheme;
-  if (localStorage.getItem("darkModeEnabled") == 'true') {
+  if (localStorage.getItem("rC:darkModeEnabled") == 'true') {
     currentTheme = 'dark';
   } else {
     currentTheme = 'light';
@@ -705,13 +713,13 @@ document.addEventListener("DOMContentLoaded", function () {
       themeIcon.src = "theme-dark.svg"; // 切换为深色主题图标
       document.body.classList.add("dark-theme"); // 添加深色主题样式
       Blockly.getMainWorkspace().setTheme(Blockly.Themes.DARK_THEME);
-      localStorage.setItem("darkModeEnabled", true);
+      localStorage.setItem("rC:darkModeEnabled", true);
     } else {
       currentTheme = "light";
       themeIcon.src = "theme-light.svg"; // 切换为浅色主题图标
       document.body.classList.remove("dark-theme"); // 移除深色主题样式\
       Blockly.getMainWorkspace().setTheme(Blockly.Themes.LIGHT_THEME);
-      localStorage.setItem("darkModeEnabled", false);
+      localStorage.setItem("rC:darkModeEnabled", false);
     }
   });
 
@@ -775,7 +783,8 @@ async function loadExtension(id) {
       extensionList.push(id);
     }
   }
-  localStorage.setItem("extensionList", JSON.stringify(extensionList))
+  localStorage.setItem("rC:extensionList", JSON.stringify(extensionList));
+  localStorage.setItem('rC:noExtension', 'false')
 }
 
 async function showExtensionModel() {
@@ -999,7 +1008,7 @@ async function loadExtensionURL(url) {
     function formatMessage({ id }) {
       const langMappings = messageMappings[currentLang] || {};
       const defaultMappings = messageMappings['default'] || {};
-  
+
       if (langMappings.hasOwnProperty(id)) {
         return langMappings[id];
       } else if (defaultMappings.hasOwnProperty(id)) {
@@ -1008,7 +1017,7 @@ async function loadExtensionURL(url) {
         return id; // 返回原始消息
       }
     }
-  
+
     function setformatMessage(mappings) {
       messageMappings = mappings;
     }
