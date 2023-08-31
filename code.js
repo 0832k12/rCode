@@ -20,7 +20,8 @@ const position = window.location.href;
 var currentLang = position.slice(((position.indexOf('?lang=') + 1 + 6) - 1), position.length);
 const rCode = Blockly;
 let extensionList = [];
-let BuiltinList = ['Console', 'Div', 'Debug'];
+let BuiltinList = ['Console', 'Div', 'Debug', 'PROS'];
+localStorage.setItem("rC:intmain", 'true')
 
 /**
  * Lookup for names of supported languages.  Keys should be in ISO 639 format.
@@ -308,6 +309,7 @@ Code.selected = 'blocks';
  * @param {string} clickedName Name of tab clicked.
  */
 Code.tabClick = function (clickedName) {
+  localStorage.setItem("rC:intmain", 'true')
   // If the XML tab was open, save and render the content.
   if (document.getElementById('tab_xml').classList.contains('tabon')) {
     var xmlTextarea = document.getElementById('content_xml');
@@ -1002,7 +1004,6 @@ async function fetchExtension(url) {
     throw error;
   }
 }
-
 async function loadExtensionURL(url) {
   try {
     const extensionCode = await fetchExtension(url);
@@ -1427,68 +1428,68 @@ function loadExtensionID(id) {
   const Debug_Extension = function () {
     setformatMessage({
       'zh-hans': {
-          'name': '调试执行',
-          'function_create': '创建函数 %1',
-          'function_do': '执行函数 %1'
+        'name': '调试执行',
+        'function_create': '创建函数 %1',
+        'function_do': '执行函数 %1'
       },
       'default': {
-          'name': 'Debug Execution',
-          'function_create': 'Create Function %1',
-          'function_do': 'Do Function %1'
+        'name': 'Debug Execution',
+        'function_create': 'Create Function %1',
+        'function_do': 'Do Function %1'
       }
-  });
-  
-  // Blockly Block Definition for 'function_create'
-  rCode.Blocks['function_create'] = {
+    });
+
+    // Blockly Block Definition for 'function_create'
+    rCode.Blocks['function_create'] = {
       init: function () {
-          this.jsonInit({
-              "type": "function_create",
-              "message0": formatMessage({ id: 'function_create' }),
-              "args0": [
-                  {
-                      "type": "input_value",
-                      "name": "FUNCTION_BODY",
-                  }
-              ],
-              "output": "function",
-              "colour": '#ff6680'
-          });
+        this.jsonInit({
+          "type": "function_create",
+          "message0": formatMessage({ id: 'function_create' }),
+          "args0": [
+            {
+              "type": "input_value",
+              "name": "FUNCTION_BODY",
+            }
+          ],
+          "output": "function",
+          "colour": '#ff6680'
+        });
       }
-  };
-  
-  // Blockly Block JavaScript Generator for 'function_create'
-  rCode.JavaScript['function_create'] = function (block) {
+    };
+
+    // Blockly Block JavaScript Generator for 'function_create'
+    rCode.JavaScript['function_create'] = function (block) {
       var functionBody = rCode.JavaScript.valueToCode(block, 'FUNCTION_BODY', rCode.JavaScript.ORDER_ATOMIC);
       var code = 'new Function(' + functionBody + ')';
       return [code, rCode.JavaScript.ORDER_ATOMIC];
-  };
-  
-  // Blockly Block Definition for 'function_do'
-  rCode.Blocks['function_do'] = {
+    };
+
+    // Blockly Block Definition for 'function_do'
+    rCode.Blocks['function_do'] = {
       init: function () {
-          this.jsonInit({
-              "type": "function_do",
-              "message0": formatMessage({ id: 'function_do' }),
-              "output": "String",
-              "args0": [
-                  {
-                      "type": "input_value",
-                      "name": "FUNCTION",
-                  }
-              ],
-              "colour": '#ff6680'
-          });
+        this.jsonInit({
+          "type": "function_do",
+          "message0": formatMessage({ id: 'function_do' }),
+          "output": "String",
+          "args0": [
+            {
+              "type": "input_value",
+              "name": "FUNCTION",
+            }
+          ],
+          "colour": '#ff6680'
+        });
       }
-  };
-  
-  // Blockly Block JavaScript Generator for 'function_do'
-  rCode.JavaScript['function_do'] = function (block) {
+    };
+
+    // Blockly Block JavaScript Generator for 'function_do'
+    rCode.JavaScript['function_do'] = function (block) {
       var functionBody = rCode.JavaScript.valueToCode(block, 'FUNCTION', rCode.JavaScript.ORDER_ATOMIC);
       var code = functionBody + '()';
       return [code, rCode.JavaScript.ORDER_ATOMIC];
-  };
-  // Block Category Definition
-  BlockInfo +=
+    };
+    // Block Category Definition
+    BlockInfo +=
       `<category name="${formatMessage({ id: 'name' })}" colour="#ff6680">
           <block type="function_create">
               <value name="FUNCTION_BODY">
@@ -1506,6 +1507,249 @@ function loadExtensionID(id) {
           </block>
       </category>`;
   }
+  const PROS_Extension = function() {
+    setformatMessage({
+      'zh-hans': {
+          'name': 'PROS',
+          'include': '#include',
+          'using_namespace': 'using namespace pros;',
+          'motor_forward': '马达前进 %1',
+          'motor_backward': '马达后退 %1',
+          'pneumatic_push': '气缸推出',
+          'pneumatic_pull': '气缸收回',
+          'declare_motor': '声明马达 %1 端口为 %2',
+          'declare_pneumatic': '声明气缸 %1 端口为 %2'
+      },
+      'default': {
+          'name': 'PROS',
+          'include': '#include',
+          'using_namespace': 'using namespace pros;',
+          'motor_forward': 'Motor Forward %1',
+          'motor_backward': 'Motor Backward %1',
+          'pneumatic_push': 'Pneumatic Push',
+          'pneumatic_pull': 'Pneumatic Pull',
+          'declare_motor': 'Declare Motor %1 at Port %2',
+          'declare_pneumatic': 'Declare Pneumatic %1 at Port %2'
+      }
+  });
+  
+  rCode.Blocks['include'] = {
+      init: function () {
+          this.jsonInit({
+              "type": "include",
+              "message0": formatMessage({ id: 'include' }) + ' %1',
+              "args0": [
+                  {
+                      "type": "field_input",
+                      "name": "HEADER",
+                      "text": "main.h"
+                  }
+              ],
+              "previousStatement": null,
+              "nextStatement": null,
+              "colour": 230
+          });
+      }
+  }
+  
+  rCode.Blocks['using_namespace'] = {
+      init: function () {
+          this.jsonInit({
+              "type": "using_namespace",
+              "message0": formatMessage({ id: 'using_namespace' }),
+              "previousStatement": null,
+              "nextStatement": null,
+              "colour": 230
+          });
+      }
+  }
+  
+  rCode.Blocks['motor_forward'] = {
+      init: function () {
+          this.jsonInit({
+              "type": "motor_forward",
+              "message0": formatMessage({ id: 'motor_forward' }, ["100"]),
+              "args0": [
+                  {
+                      "type": "field_number",
+                      "name": "SPEED",
+                      "value": 100
+                  }
+              ],
+              "previousStatement": null,
+              "nextStatement": null,
+              "colour": 160
+          });
+      }
+  }
+  
+  rCode.Blocks['motor_backward'] = {
+      init: function () {
+          this.jsonInit({
+              "type": "motor_backward",
+              "message0": formatMessage({ id: 'motor_backward' }, ["100"]),
+              "args0": [
+                  {
+                      "type": "field_number",
+                      "name": "SPEED",
+                      "value": 100
+                  }
+              ],
+              "previousStatement": null,
+              "nextStatement": null,
+              "colour": 160
+          });
+      }
+  }
+  
+  rCode.Blocks['pneumatic_push'] = {
+      init: function () {
+          this.jsonInit({
+              "type": "pneumatic_push",
+              "message0": formatMessage({ id: 'pneumatic_push' }),
+              "previousStatement": null,
+              "nextStatement": null,
+              "colour": 160
+          });
+      }
+  }
+  
+  rCode.Blocks['pneumatic_pull'] = {
+      init: function () {
+          this.jsonInit({
+              "type": "pneumatic_pull",
+              "message0": formatMessage({ id: 'pneumatic_pull' }),
+              "previousStatement": null,
+              "nextStatement": null,
+              "colour": 160
+          });
+      }
+  }
+  
+  rCode.Blocks['declare_motor'] = {
+      init: function () {
+          this.jsonInit({
+              "type": "declare_motor",
+              "message0": formatMessage({ id: 'declare_motor' }),
+              "args0": [
+                  {
+                      "type": "field_input",
+                      "name": "MOTOR_NAME",
+                      "text": "motor1"
+                  },
+                  {
+                      "type": "field_input",
+                      "name": "MOTOR_PORT",
+                      "text": "1"
+                  }
+              ],
+              "previousStatement": null,
+              "nextStatement": null,
+              "colour": 230
+          });
+      }
+  }
+  
+  
+  rCode.Blocks['declare_pneumatic'] = {
+      init: function () {
+          this.jsonInit({
+              "type": "declare_pneumatic",
+              "message0": formatMessage({ id: 'declare_pneumatic' }),
+              "args0": [
+                  {
+                      "type": "field_input",
+                      "name": "PNEUMATIC_NAME",
+                      "text": "pneumatic1"
+                  },
+                  {
+                      "type": "field_input",
+                      "name": "PNEUMATIC_PORT",
+                      "text": "A"
+                  }
+              ],
+              "previousStatement": null,
+              "nextStatement": null,
+              "colour": 230
+          });
+      }
+  }
+  
+  
+  rCode.cpp['include'] = function (block) {
+      var header = block.getFieldValue('HEADER');
+      var code = `#include <${header}>\n`;
+      localStorage.setItem("rC:intmain",'false');
+      return code;
+  }
+  
+  rCode.cpp['using_namespace'] = function (block) {
+      var code = 'using namespace pros;\n';
+      localStorage.setItem("rC:intmain",'false');
+      return code;
+  }
+  
+  rCode.cpp['motor_forward'] = function (block) {
+      var speed = parseFloat(block.getFieldValue('SPEED'));
+      var code = `motor.move(MOTOR_PORT, ${speed});\n`;
+      return code;
+  }
+  
+  rCode.cpp['motor_backward'] = function (block) {
+      var speed = parseFloat(block.getFieldValue('SPEED'));
+      var code = `motor.move(MOTOR_PORT, -${speed});\n`;
+      return code;
+  }
+  
+  rCode.cpp['pneumatic_push'] = function (block) {
+      var code = `pneumatic.push(PNEUMATIC_PORT);\n`;
+      return code;
+  }
+  
+  rCode.cpp['pneumatic_pull'] = function (block) {
+      var code = `pneumatic.pull(PNEUMATIC_PORT);\n`;
+      return code;
+  }
+  
+  rCode.cpp['declare_motor'] = function (block) {
+      var motorName = block.getFieldValue('MOTOR_NAME');
+      var motorPort = block.getFieldValue('MOTOR_PORT');
+      var code = `Motor ${motorName}(${motorPort});\n`;
+      return code;
+  }
+  
+  rCode.cpp['declare_pneumatic'] = function (block) {
+      var pneumaticName = block.getFieldValue('PNEUMATIC_NAME');
+      var pneumaticPort = block.getFieldValue('PNEUMATIC_PORT');
+      var code = `Pneumatic ${pneumaticName}(${pneumaticPort});\n`;
+      return code;
+  }
+  
+  BlockInfo +=
+      `<category name="${formatMessage({ id: 'name' })}" colour="230">
+        <block type="include">
+          <field name="HEADER">main.h</field>
+        </block>
+        <block type="using_namespace"></block>
+        <block type="declare_motor">
+          <field name="MOTOR_NAME">motor1</field>
+          <field name="MOTOR_PORT">1</field>
+        </block>
+        <block type="declare_pneumatic">
+          <field name="PNEUMATIC_NAME">pneumatic1</field>
+          <field name="PNEUMATIC_PORT">A</field>
+        </block>
+        <block type="motor_forward">
+          <field name="SPEED">100</field>
+        </block>
+        <block type="motor_backward">
+          <field name="SPEED">100</field>
+        </block>
+        <block type="pneumatic_push"></block>
+        <block type="pneumatic_pull"></block>
+      </category>`;
+  
+  }
   if (extension == 'Console') {
     Console_Extension();
   }
@@ -1514,6 +1758,9 @@ function loadExtensionID(id) {
   }
   else if (extension == 'Debug') {
     Debug_Extension();
+  }
+  else if (extension == 'PROS') {
+    PROS_Extension();
   }
   toolboxXml.innerHTML = BlockInfo;
   Code.workspace.updateToolbox(toolboxXml);

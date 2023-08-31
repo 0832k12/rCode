@@ -6,6 +6,7 @@ const extensions = [
     { id: 'Console', name: translations.ConsoleName, description: translations.ConsoleDescription, author: translations.ConsoleAuthor, image: "./extensions/Console/Console.svg", programmingLanguages: ['JavaScript'] },
     { id: 'Div', name: translations.DivName, description: translations.DivDescription, author: translations.DivAuthor, image: "./extensions/Div/Div.svg", programmingLanguages: ['JavaScript'] },
     { id: 'Debug', name: translations.DebugName, description: translations.DebugDescription, author: translations.DebugAuthor, image: "./extensions/Debug/Debug.svg", programmingLanguages: ['JavaScript'] },
+    { id: 'PROS', name: translations.PROSName, description: translations.PROSDescription, author: translations.PROSAuthor, image: "./extensions/PROS/PROS.svg", programmingLanguages: ['C++'] },
     // 添加更多展示项的数据...
 ];
 
@@ -72,6 +73,9 @@ function getTranslationsForLanguage(language) {
             DebugName: '调试执行',
             DebugDescription: '在代码中执行代码。',
             DebugAuthor: '0832',
+            PROSName: 'PROS',
+            PROSDescription: '用于VEX机器人编程的扩展。',
+            PROSAuthor: '0832',
             authorLabel: '作者',
             languageSupport: '编译支持'
         };
@@ -89,6 +93,9 @@ function getTranslationsForLanguage(language) {
             DebugName: 'Debug Execution',
             DebugDescription: 'Coding in code.',
             DebugAuthor: '0832',
+            PROSName: 'PROS',
+            PROSDescription: 'Extension for VEX coding.',
+            PROSAuthor: '0832',
             authorLabel: 'Author',
             languageSupport: 'Compile support'
         };

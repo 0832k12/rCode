@@ -36,39 +36,57 @@ Blockly.cpp.init = function (a) {
 
     Blockly.cpp.LOG_VAR = a;
 
-    for (d = 0; d < a.length; d++){
-        if(a[d].type === "String")
+    for (d = 0; d < a.length; d++) {
+        if (a[d].type === "String")
             var_string.push(Blockly.cpp.nameDB_.getName(a[d].getId(), Blockly.Variables.NAME_TYPE));
-        if(a[d].type === "Number" || a[d].type === "")
+        if (a[d].type === "Number" || a[d].type === "")
             var_number.push(Blockly.cpp.nameDB_.getName(a[d].getId(), Blockly.Variables.NAME_TYPE));
-        if(a[d].type === "Double")
+        if (a[d].type === "Double")
             var_double.push(Blockly.cpp.nameDB_.getName(a[d].getId(), Blockly.Variables.NAME_TYPE));
         b.push(Blockly.cpp.nameDB_.getName(a[d].getId(), Blockly.Variables.NAME_TYPE));
     }
 
-    if(var_number.length>0) Blockly.cpp.definitions_.variables_number = "int " + var_number.join(", ") + ";";
-    if(var_string.length>0) Blockly.cpp.definitions_.variables_colour = "string " + var_string.join(", ") + ";";
-    if(var_double.length>0) Blockly.cpp.definitions_.variables_double = "double " + var_double.join(", ") + ";";
+    if (var_number.length > 0) Blockly.cpp.definitions_.variables_number = "int " + var_number.join(", ") + ";";
+    if (var_string.length > 0) Blockly.cpp.definitions_.variables_colour = "string " + var_string.join(", ") + ";";
+    if (var_double.length > 0) Blockly.cpp.definitions_.variables_double = "double " + var_double.join(", ") + ";";
 
     //b.length && (Blockly.cpp.definitions_.variables = "var " + b.join(", ") + ";")
 };
 Blockly.cpp.finish = function (a) {
-    a && (a = Blockly.cpp.prefixLines(a, Blockly.cpp.INDENT));
-    a = "int main() {\n" + a + "}";
-    var b = [], c = [], d, sep="";
-    for (d in Blockly.cpp.definitions_) {
-        var e = Blockly.cpp.definitions_[d];
-        if(e.startsWith("#include"))
-            c.push(e);
-        else
-            b.push(e);
-        //e.match(/^import\s/) ? c.push(e): b.push(e)
+    if (localStorage.getItem("rC:intmain") == 'true') {
+        a && (a = Blockly.cpp.prefixLines(a, Blockly.cpp.INDENT));
+        a = "int main() {\n" + a + "}";
+        var b = [], c = [], d, sep = "";
+        for (d in Blockly.cpp.definitions_) {
+            var e = Blockly.cpp.definitions_[d];
+            if (e.startsWith("#include"))
+                c.push(e);
+            else
+                b.push(e);
+            //e.match(/^import\s/) ? c.push(e): b.push(e)
+        }
+        delete Blockly.cpp.definitions_;
+        delete Blockly.cpp.functionNames_;
+        Blockly.cpp.nameDB_.reset();
+        if (c.length != 0) sep = "\n";
+        return c.join("\n") + sep + "#include<iostream>\nusing namespace std;\n" + (b.join("\n") + "\n") + a
     }
-    delete Blockly.cpp.definitions_;
-    delete Blockly.cpp.functionNames_;
-    Blockly.cpp.nameDB_.reset();
-    if(c.length!=0) sep = "\n";
-    return c.join("\n") + sep + "#include<iostream>\nusing namespace std;\n" + (b.join("\n") + "\n" ) + a
+    else {
+        var b = [], c = [], d, sep = "";
+        for (d in Blockly.cpp.definitions_) {
+            var e = Blockly.cpp.definitions_[d];
+            if (e.startsWith("#include"))
+                c.push(e);
+            else
+                b.push(e);
+            //e.match(/^import\s/) ? c.push(e): b.push(e)
+        }
+        delete Blockly.cpp.definitions_;
+        delete Blockly.cpp.functionNames_;
+        Blockly.cpp.nameDB_.reset();
+        if (c.length != 0) sep = "\n";
+        return c.join("\n") + sep + (b.join("\n") + "\n") + a
+    }
 };
 Blockly.cpp.scrubNakedValue = function (a) {
     return a + ";\n"
@@ -163,7 +181,7 @@ Blockly.cpp.lists_getIndex = function (a) {
     if (("RANDOM" != d || "REMOVE" != c) && "FROM_END" != d || e.match(/^\w+$/)) switch (d) {
         case "FIRST":
             if ("GET" == c) return [e + ".first",
-                Blockly.cpp.ORDER_UNARY_POSTFIX];
+            Blockly.cpp.ORDER_UNARY_POSTFIX];
             if ("GET_REMOVE" == c) return [e + ".removeAt(0)", Blockly.cpp.ORDER_UNARY_POSTFIX];
             if ("REMOVE" == c) return e + ".removeAt(0);\n";
             break;
@@ -176,7 +194,7 @@ Blockly.cpp.lists_getIndex = function (a) {
             d = Blockly.cpp.getAdjusted(a, "AT");
             if ("GET" == c) return [e + "[" + d + "]", Blockly.cpp.ORDER_UNARY_POSTFIX];
             if ("GET_REMOVE" == c) return [e +
-            ".removeAt(" + d + ")", Blockly.cpp.ORDER_UNARY_POSTFIX];
+                ".removeAt(" + d + ")", Blockly.cpp.ORDER_UNARY_POSTFIX];
             if ("REMOVE" == c) return e + ".removeAt(" + d + ");\n";
             break;
         case "FROM_END":
@@ -316,7 +334,7 @@ Blockly.cpp.controls_if = function (a) {
 };
 Blockly.cpp.controls_ifelse = Blockly.cpp.controls_if;
 Blockly.cpp.logic_compare = function (a) {
-    var b = {EQ: "==", NEQ: "!=", LT: "<", LTE: "<=", GT: ">", GTE: ">="}[a.getFieldValue("OP")],
+    var b = { EQ: "==", NEQ: "!=", LT: "<", LTE: "<=", GT: ">", GTE: ">=" }[a.getFieldValue("OP")],
         c = "==" == b || "!=" == b ? Blockly.cpp.ORDER_EQUALITY : Blockly.cpp.ORDER_RELATIONAL,
         d = Blockly.cpp.valueToCode(a, "A", c) || "0";
     a = Blockly.cpp.valueToCode(a, "B", c) || "0";
@@ -432,7 +450,7 @@ Blockly.cpp.math_arithmetic = function (a) {
     var d = Blockly.cpp.valueToCode(a, "A", b) || "0";
     a = Blockly.cpp.valueToCode(a, "B", b) || "0";
     return c ? [d + c + a, b] : (Blockly.cpp.definitions_.import_cpp_math = "#include<cmath>", ["pow(" + d + ", " +
-    a + ")", Blockly.cpp.ORDER_UNARY_POSTFIX])
+        a + ")", Blockly.cpp.ORDER_UNARY_POSTFIX])
 };
 Blockly.cpp.math_single = function (a) {
     var b = a.getFieldValue("OP");
@@ -612,7 +630,7 @@ Blockly.cpp.math_constrain = function (a) {
 Blockly.cpp.math_random_int = function (a) {
     Blockly.cpp.definitions_.import_cpp_rand = "#include<cstdlib>";
     a = Blockly.cpp.valueToCode(a, "TO", Blockly.cpp.ORDER_NONE) || "0";
-    return ["rand() % " +  a , Blockly.cpp.ORDER_UNARY_POSTFIX]
+    return ["rand() % " + a, Blockly.cpp.ORDER_UNARY_POSTFIX]
 };
 Blockly.cpp.math_random_float = function (a) {
     Blockly.cpp.definitions_.import_cpp_math = "import 'cpp:math' as Math;";
@@ -683,7 +701,7 @@ Blockly.cpp.text_charAt = function (a) {
         case "LAST":
         case "FROM_END":
             return a = Blockly.cpp.getAdjusted(a, "AT", 1), b = Blockly.cpp.provideFunction_("text_get_from_end", ["String " + Blockly.cpp.FUNCTION_NAME_PLACEHOLDER_ +
-            "(String text, num x) {", "  return text[text.length - x];", "}"]), [b + "(" + c + ", " + a + ")", Blockly.cpp.ORDER_UNARY_POSTFIX];
+                "(String text, num x) {", "  return text[text.length - x];", "}"]), [b + "(" + c + ", " + a + ")", Blockly.cpp.ORDER_UNARY_POSTFIX];
         case "RANDOM":
             return Blockly.cpp.definitions_.import_cpp_math = "import 'cpp:math' as Math;", b = Blockly.cpp.provideFunction_("text_random_letter", ["String " + Blockly.cpp.FUNCTION_NAME_PLACEHOLDER_ + "(String text) {", "  int x = new Math.Random().nextInt(text.length);", "  return text[x];", "}"]), [b + "(" + c + ")", Blockly.cpp.ORDER_UNARY_POSTFIX]
     }
@@ -727,7 +745,7 @@ Blockly.cpp.text_getSubstring = function (a) {
     return [a, Blockly.cpp.ORDER_UNARY_POSTFIX]
 };
 Blockly.cpp.text_changeCase = function (a) {
-    var b = {UPPERCASE: ".toUpperCase()", LOWERCASE: ".toLowerCase()", TITLECASE: null}[a.getFieldValue("CASE")];
+    var b = { UPPERCASE: ".toUpperCase()", LOWERCASE: ".toLowerCase()", TITLECASE: null }[a.getFieldValue("CASE")];
     a = Blockly.cpp.valueToCode(a, "TEXT", b ? Blockly.cpp.ORDER_UNARY_POSTFIX : Blockly.cpp.ORDER_NONE) || "''";
     return [b ? a + b : Blockly.cpp.provideFunction_("text_toTitleCase", ["String " + Blockly.cpp.FUNCTION_NAME_PLACEHOLDER_ + "(String str) {", "  RegExp exp = new RegExp(r'\\b');", "  List<String> list = str.split(exp);", "  final title = new StringBuffer();", "  for (String part in list) {",
         "    if (part.length > 0) {", "      title.write(part[0].toUpperCase());", "      if (part.length > 0) {", "        title.write(part.substring(1).toLowerCase());", "      }", "    }", "  }", "  return title.toString();", "}"]) + "(" + a + ")", Blockly.cpp.ORDER_UNARY_POSTFIX]
