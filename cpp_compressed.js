@@ -620,27 +620,10 @@ Blockly.cpp.math_random_float = function (a) {
 };
 Blockly.cpp.procedures = {};
 Blockly.cpp.procedures_defreturn = function (a) {
-    var b = Blockly.cpp.nameDB_.getName(a.getFieldValue("NAME"), Blockly.Procedures.NAME_TYPE),
-        c = Blockly.cpp.statementToCode(a, "STACK");
-    if (Blockly.cpp.STATEMENT_PREFIX) {
-        var d = a.id.replace(/\$/g, "$$$$");
-        c = Blockly.cpp.prefixLines(Blockly.cpp.STATEMENT_PREFIX.replace(/%1/g, "'" + d + "'"), Blockly.cpp.INDENT) + c
-    }
-    Blockly.cpp.INFINITE_LOOP_TRAP && (c = Blockly.cpp.INFINITE_LOOP_TRAP.replace(/%1/g, "'" + a.id + "'") + c);
-    (d = Blockly.cpp.valueToCode(a, "RETURN", Blockly.cpp.ORDER_NONE) ||
-        "") && (d = Blockly.cpp.INDENT + "return " + d + ";\n");
-    var var_type = "";
-    var var_name = Blockly.cpp.valueToCode(a, "RETURN", Blockly.cpp.ORDER_NONE);
-    var_type = Blockly.JavaScript.get_variable_type_by_var_name(var_name);
-    if(var_type=="Number") var_type = "int";
-    if(var_type=="Double") var_type = "double";
-    if(var_type=="String") var_type = "string";
-    for (var e = d ? var_type : "void", f = [], g = 0; g < a.arguments_.length; g++) f[g] = Blockly.cpp.nameDB_.getName(a.arguments_[g], Blockly.Variables.NAME_TYPE);
-    c = e + " " + b + "(" + f.join(", ") + ") {\n" + c + d + "}";
-    c = Blockly.cpp.scrub_(a, c);
-    Blockly.cpp.definitions_["%" + b] = c;
-    return null
-};
+    var b = Blockly.cpp.nameDB_.getName(a.getFieldValue("NAME"), Blockly.PROCEDURE_CATEGORY_NAME), c = ""; Blockly.cpp.STATEMENT_PREFIX && (c += Blockly.cpp.injectId(Blockly.cpp.STATEMENT_PREFIX, a)); Blockly.cpp.STATEMENT_SUFFIX && (c += Blockly.cpp.injectId(Blockly.cpp.STATEMENT_SUFFIX, a)); c && (c = Blockly.cpp.prefixLines(c, Blockly.cpp.INDENT)); var d = ""; Blockly.cpp.INFINITE_LOOP_TRAP && (d = Blockly.cpp.prefixLines(Blockly.cpp.injectId(Blockly.cpp.INFINITE_LOOP_TRAP, a),
+        Blockly.cpp.INDENT)); var e = Blockly.cpp.statementToCode(a, "STACK"), f = Blockly.cpp.valueToCode(a, "RETURN", Blockly.cpp.ORDER_NONE) || "", g = ""; e && f && (g = c); f && (f = Blockly.cpp.INDENT + "return " + f + ";\n"); for (var m = f ? "dynamic" : "void", k = [], l = a.getVars(), h = 0; h < l.length; h++)k[h] = Blockly.cpp.nameDB_.getName(l[h], Blockly.VARIABLE_CATEGORY_NAME); c = m + " " + b + "(" + k.join(", ") + ") {\n" + c + d + e + g + f + "}"; c = Blockly.cpp.scrub_(a, c); Blockly.cpp.definitions_["%" + b] = c; return null
+}; Blockly.cpp.procedures_defnoreturn = Blockly.cpp.procedures_defreturn;
+
 Blockly.cpp.procedures_defnoreturn = Blockly.cpp.procedures_defreturn;
 Blockly.cpp.procedures_callreturn = function (a) {
     for (var b = Blockly.cpp.nameDB_.getName(a.getFieldValue("NAME"), Blockly.Procedures.NAME_TYPE), c = [], d = 0; d < a.arguments_.length; d++) c[d] = Blockly.cpp.valueToCode(a, "ARG" + d, Blockly.cpp.ORDER_NONE) || "null";
@@ -673,15 +656,15 @@ Blockly.cpp.text_join = function (a) {
     }
 };
 Blockly.cpp.text_append = function (a) {
-    var b = Blockly.cpp.nameDB_.getName(a.getFieldValue("VAR"), Blockly.Variables.NAME_TYPE);
+    var b = Blockly.cpp.valueToCode(a, "VALUE", Blockly.cpp.ORDER_UNARY_POSTFIX);
     a = Blockly.cpp.valueToCode(a, "TEXT", Blockly.cpp.ORDER_NONE) || "''";
     return b + "+" + "=" + a + ";\n"
 };
 Blockly.cpp.text_length = function (a) {
-    return [Blockly.cpp.nameDB_.getName(a.getFieldValue("VAR"), Blockly.Variables.NAME_TYPE) + ".length()", Blockly.cpp.ORDER_UNARY_POSTFIX]
+    return [Blockly.cpp.valueToCode(a, "VALUE", Blockly.cpp.ORDER_UNARY_POSTFIX) + ".length()", Blockly.cpp.ORDER_UNARY_POSTFIX]
 };
 Blockly.cpp.text_isEmpty = function (a) {
-    return [Blockly.cpp.nameDB_.getName(a.getFieldValue("VAR"), Blockly.Variables.NAME_TYPE) + ".empty()", Blockly.cpp.ORDER_UNARY_POSTFIX]
+    return [Blockly.cpp.valueToCode(a, "VALUE", Blockly.cpp.ORDER_UNARY_POSTFIX) + ".empty()", Blockly.cpp.ORDER_UNARY_POSTFIX]
 };
 Blockly.cpp.text_indexOf = function (a) {
     var b = "FIRST" == a.getFieldValue("END") ? "find" : "lastfind",
