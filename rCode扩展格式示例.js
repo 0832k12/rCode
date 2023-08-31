@@ -14,6 +14,7 @@ setformatMessage({
             ['温度', 'get_temperature']
         ],
         'check_button_pressed': '在主控 %1 中，按下按钮 %2？',
+        'get_analog': '在主控 %1 中， 摇杆XY %2',
         'declare_motor': '设置马达 %1 端口为 %2',
         'declare_pneumatic': '设置气缸 %1 端口为 %2'
     },
@@ -32,6 +33,7 @@ setformatMessage({
             ['Temperature', 'get_temperature']
         ],
         'check_button_pressed': 'In Controller %1, Pressed Button %2?',
+        'get_analog': 'In Controller %1, Analog %2',
         'declare_motor': 'Declare Motor %1 at Port %2',
         'declare_pneumatic': 'Declare Pneumatic %1 at Port %2'
     }
@@ -131,7 +133,7 @@ rCode.Blocks['pneumatic_pull'] = {
 }
 
 
-  
+
 rCode.Blocks['declare_motor'] = {
     init: function () {
         this.jsonInit({
@@ -229,7 +231,7 @@ rCode.Blocks['check_button_pressed'] = {
     init: function () {
         this.jsonInit({
             "type": "check_button_pressed",
-            "message0": "在主控 %1 中，按下按钮 %2？",
+            "message0": formatMessage({ id: 'check_button_pressed' }),
             "args0": [
                 {
                     "type": "field_input",
@@ -255,8 +257,36 @@ rCode.Blocks['check_button_pressed'] = {
                     ]
                 }
             ],
-            "output": "Boolean",
-            "outputShape": rCode.OUTPUT_SHAPE_HEXAGONAL,
+            "output": 'Boolean',
+            "outputShape": Blockly.OUTPUT_SHAPE_HEXAGONAL,
+            "colour": 100
+        });
+    }
+};
+
+rCode.Blocks['get_analog'] = {
+    init: function () {
+        this.jsonInit({
+            "type": "get_analog",
+            "message0": formatMessage({ id: 'get_analog' }),
+            "args0": [
+                {
+                    "type": "field_input",
+                    "name": "CONTROLLER_NAME",
+                    "text": "controller1"
+                },
+                {
+                    "type": "field_dropdown",
+                    "name": "ANALOG",
+                    "options": [
+                        ['Right X', 'ANALOG_RIGHT_X'],
+                        ['Right Y', 'ANALOG_RIGHT_Y'],
+                        ['Left X', 'ANALOG_LEFT_X'],
+                        ['Left Y', 'ANALOG_LEFT_Y'],
+                    ]
+                }
+            ],
+            "output": null,
             "colour": 100
         });
     }
@@ -265,13 +295,13 @@ rCode.Blocks['check_button_pressed'] = {
 rCode.cpp['include'] = function (block) {
     var header = block.getFieldValue('HEADER');
     var code = `#include <${header}>\n`;
-    localStorage.setItem("rC:intmain",'false');
+    localStorage.setItem("rC:intmain", 'false');
     return code;
 }
 
 rCode.cpp['using_namespace'] = function () {
     var code = 'using namespace pros;\n';
-    localStorage.setItem("rC:intmain",'false');
+    localStorage.setItem("rC:intmain", 'false');
     return code;
 }
 
@@ -320,7 +350,7 @@ rCode.cpp['get_motor_property'] = function (block) {
     var motorName = block.getFieldValue('MOTOR_NAME');
     var property = block.getFieldValue('PROPERTY');
     var code = `${motorName}.${property}()`;
-    return [code, rCode.ORDER_ATOMIC];
+    return [code, rCode.cpp.ORDER_ATOMIC];
 };
 
 // 实现检测按钮按下的 C++ 代码生成逻辑
@@ -328,7 +358,15 @@ rCode.cpp['check_button_pressed'] = function (block) {
     var controllerName = block.getFieldValue('CONTROLLER_NAME');
     var button = block.getFieldValue('BUTTON');
     var code = `${controllerName}.get_digital(${button})`;
-    return [code, rCode.ORDER_ATOMIC];
+    return [code, rCode.cpp.ORDER_ATOMIC];
+};
+
+// 实现检测按钮按下的 C++ 代码生成逻辑
+rCode.cpp['get_analog'] = function (block) {
+    var controllerName = block.getFieldValue('CONTROLLER_NAME');
+    var analog = block.getFieldValue('ANALOG');
+    var code = `${controllerName}.get_analog(${analog})`;
+    return [code, rCode.cpp.ORDER_ATOMIC];
 };
 
 BlockInfo +=
@@ -361,4 +399,8 @@ BlockInfo +=
         <field name="CONTROLLER_NAME">master</field>
         <field name="BUTTON">DIGITAL_L1</field>
     </block>
+    <block type="get_analog">
+    <field name="CONTROLLER_NAME">master</field>
+    <field name="ANALOG">ANALOG_RIGHT_X</field>
+</block>
     </category>`;
