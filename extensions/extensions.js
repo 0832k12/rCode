@@ -6,7 +6,7 @@ const extensions = [
     { id: 'Console', name: translations.ConsoleName, description: translations.ConsoleDescription, author: translations.ConsoleAuthor, image: "./extensions/Console/Console.svg", programmingLanguages: ['JavaScript'] },
     { id: 'Div', name: translations.DivName, description: translations.DivDescription, author: translations.DivAuthor, image: "./extensions/Div/Div.svg", programmingLanguages: ['JavaScript'] },
     { id: 'Debug', name: translations.DebugName, description: translations.DebugDescription, author: translations.DebugAuthor, image: "./extensions/Debug/Debug.svg", programmingLanguages: ['JavaScript'] },
-    { id: 'PROS', name: translations.PROSName, description: translations.PROSDescription, author: translations.PROSAuthor, image: "./extensions/PROS/PROS.svg", programmingLanguages: ['C++'] },
+    { id: 'PROS', name: translations.PROSName, description: translations.PROSDescription, author: translations.PROSAuthor, image: "./extensions/PROS/PROS.svg", programmingLanguages: ['CPP'] },
     // 添加更多展示项的数据...
 ];
 

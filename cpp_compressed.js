@@ -85,7 +85,7 @@ Blockly.cpp.finish = function (a) {
         delete Blockly.cpp.functionNames_;
         Blockly.cpp.nameDB_.reset();
         if (c.length != 0) sep = "\n";
-        return c.join("\n") + sep + (b.join("\n") + "\n") + a
+        return c.join("\n") + sep + a + (b.join("\n") + "\n")
     }
 };
 Blockly.cpp.scrubNakedValue = function (a) {

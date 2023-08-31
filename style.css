@@ -374,7 +374,21 @@ button {
 }
 
 .language-bar.Java {
-  background-color: #007396; /* Java 对应的颜色 */
+  background-color: #9f711a; /* Java 对应的颜色 */
 }
 
-/* 添加其他编程语言的样式... */
+.language-bar.PHP {
+  background-color: #555d94; /* Java 对应的颜色 */
+}
+
+.language-bar.CPP {
+  background-color: #d0497a; /* Java 对应的颜色 */
+}
+
+.language-bar.Dart {
+  background-color: #555d94; /* Java 对应的颜色 */
+}
+
+.language-bar.Lua {
+  background-color: #07037f; /* Java 对应的颜色 */
+}
