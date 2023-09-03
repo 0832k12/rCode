@@ -651,7 +651,6 @@ Code.initLanguage = function () {
 
   // Inject language strings.
   document.title += ' ' + MSG['title'];
-  document.getElementById('title').textContent = MSG['title'];
   document.getElementById('tab_blocks').textContent = MSG['blocks'];
 
   document.getElementById('linkButton').title = MSG['linkTooltip'];
@@ -753,6 +752,113 @@ document.addEventListener("DOMContentLoaded", function () {
       extensionPage.style.display = "none";
       loadExtension(extensionId);
     });
+  });
+  var fileDropdown = document.getElementById("fileDropdown");
+  var fileDropdownContent = document.getElementById("fileDropdownContent");
+  // 点击文件按钮时显示或隐藏下拉框内容
+  fileDropdown.addEventListener("click", function () {
+    fileDropdownContent.classList.toggle("show");
+  });
+
+  // 点击页面其他地方时隐藏下拉框内容
+  window.addEventListener("click", function (event) {
+    if (!event.target.matches(".dropbtn")) {
+      if (fileDropdownContent.classList.contains("show")) {
+        fileDropdownContent.classList.remove("show");
+      }
+    }
+  });
+
+  // 处理保存文件和加载文件的点击事件
+  var saveFileButton = document.getElementById("saveFile");
+  var loadFileButton = document.getElementById("loadFile");
+
+  saveFileButton.addEventListener("click", async function () {
+    var xmlTextarea = document.getElementById('content_xml');
+    var xmlDom = Blockly.Xml.workspaceToDom(Code.workspace);
+    var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+    // 将XML字符串解析为DOM文档
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+    // 获取所有的 <extension> 元素
+    const extensionElements = xmlDoc.querySelectorAll("extension");
+
+    // 从文档中删除每个 <extension> 元素
+    extensionElements.forEach(extensionElement => {
+      extensionElement.parentNode.removeChild(extensionElement);
+    });
+
+    for (let i = 0; i < extensionList.length; i++) {
+      const extensionElement = xmlDoc.createElement("extension");
+      extensionElement.setAttribute("id", extensionList[i]);
+
+      const rootElement = xmlDoc.documentElement;
+      rootElement.appendChild(extensionElement);
+    }
+    xmlText = new XMLSerializer().serializeToString(xmlDoc);
+    const handle = await showSaveFilePicker({
+      suggestedName: currentLang == 'zh-hans' ? '项目' : 'Project',
+      types: [{
+        description: currentLang == 'zh-hans' ? 'rCode 项目' : 'rCode Project',
+        accept: { 'text/plain': ['.rx4', '.xml'] },
+      }],
+    });
+
+    const blob = new Blob([xmlText]);
+
+    const writableStream = await handle.createWritable();
+    await writableStream.write(blob);
+    await writableStream.close();
+  });
+
+  const fileInput = document.getElementById('fileInput');
+  loadFileButton.addEventListener("click", function () {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (event) => {
+    const selectedFile = event.target.files[0];
+
+    if (selectedFile) {
+      const reader = new FileReader();
+
+      reader.onload = (fileContentEvent) => {
+        const fileContent = fileContentEvent.target.result;
+        var xmlDom = Blockly.Xml.textToDom(fileContent);
+        Code.workspace.clear();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(fileContent, "application/xml");
+
+        // 获取所有的 <extension> 元素
+        const extensionElements = xmlDoc.querySelectorAll("extension");
+
+        // 遍历每个 <extension> 元素并加载
+        extensionElements.forEach(async extensionElement => {
+          const extensionId = extensionElement.getAttribute("id");
+          if (extensionId) {
+            await loadExtension(extensionId);
+          }
+        });
+        Blockly.Xml.domToWorkspace(xmlDom, Code.workspace);
+      };
+
+      reader.readAsText(selectedFile);
+    }
+  });
+  // 获取关于页面和按钮
+  const aboutPage = document.getElementById('aboutPage');
+  const aboutButton = document.getElementById('aboutButton');
+  const closeAboutButton = document.getElementById('closeAboutButton');
+
+  // 显示关于页面
+  aboutButton.addEventListener('click', () => {
+    aboutPage.style.display = 'block';
+  });
+
+  // 隐藏关于页面
+  closeAboutButton.addEventListener('click', () => {
+    aboutPage.style.display = 'none';
   });
 });
 
