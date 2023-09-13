@@ -16,12 +16,34 @@
 const rCode = Blockly;
 rCode.UI = {};
 rCode.Extension = {};
-rCode.currentLang = window.location.href.slice(((window.location.href.indexOf('?lang=') + 1 + 6) - 1), window.location.href.length);
-rCode.secLoad = false;
 rCode.extensionList = [];
+rCode.secLoad = false;
+rCode.module = {};
 rCode.BuiltinList = ['Console', 'Div', 'Debug', 'PROS'];
 localStorage.setItem("rC:intmain", 'true')
 
+
+rCode.module.require = function (address) {
+  var script = document.createElement('script');
+  script.setAttribute('src', address);
+  document.head.appendChild(script);
+}
+
+
+rCode.getUrlBases = function (queryString) {
+  const pattern = /[\?&]([^=]+)=([^&]+)/g;
+  const params = {};
+  let match;
+
+  while ((match = pattern.exec(queryString)) !== null) {
+    const key = decodeURIComponent(match[1]);
+    const value = decodeURIComponent(match[2]);
+    params[key] = value;
+  }
+
+  return params;
+}
+rCode.currentLang = rCode.getUrlBases(window.location.href).lang;
 /**
  * Lookup for names of supported languages.  Keys should be in ISO 639 format.
  */
@@ -157,7 +179,7 @@ rCode.UI.isRtl = function () {
  * Load blocks saved on App Engine Storage or in session/local storage.
  * @param {string} defaultXml Text representation of default blocks.
  */
-rCode.UI.loadBlocks = function (defaultXml) {
+rCode.UI.loadBlocks = async function (defaultXml) {
   try {
     var loadOnce = window.sessionStorage.loadOnceBlocks;
   } catch (e) {
@@ -191,9 +213,40 @@ rCode.UI.loadBlocks = function (defaultXml) {
     // initialization is not affected from a failed load.
     window.setTimeout(BlocklyStorage.restoreBlocks, 0);
   }
-  if (rCode.secLoad == false) {
-    localStorage.setItem('rC:noExtension', 'true')
-    localStorage.setItem('rC:rCode.extensionList', '')
+  if (rCode.secLoad == false) {//执行网址?=加载
+    const BaseString = rCode.getUrlBases(window.location.href);
+    let Extensions = JSON.parse(BaseString.extension ? BaseString.extension : '[]');
+    let xml = BaseString.xml ? BaseString.xml : undefined;
+    let project = BaseString.project ? BaseString.project : undefined;
+    if (Extensions.length > 0) {
+      {
+        for (let i = 0; i < Extensions.length; i++) {
+          const item = Extensions[i];
+          rCode.Extension.loadExtension(item);
+        }
+      }
+      localStorage.setItem('rC:noExtension', 'false')
+      localStorage.setItem('rC:rCode.extensionList', JSON.stringify(rCode.extensionList))
+    }
+    else {
+      localStorage.setItem('rC:noExtension', 'true')
+      localStorage.setItem('rC:rCode.extensionList', '')
+    }
+    if (xml) {
+      rCode.UI.workspace.clear();
+      Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml), rCode.UI.workspace);
+    }
+    if (project) {//fetch project to XML
+      async function getProjectFromUrl(url) {
+        return new Promise((resolve, reject) => {
+          fetch(url).then(response => response.text()).then(resolve).catch(reject);
+        });
+      }
+      rCode.UI.workspace.clear();
+      await getProjectFromUrl(project).then(xml => {
+        Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml), rCode.UI.workspace);
+      })
+    }
   }
 };
 
@@ -252,9 +305,7 @@ rCode.UI.bindClick = function (el, func) {
  * Load the Prettify CSS and JavaScript.
  */
 rCode.UI.importPrettify = function () {
-  var script = document.createElement('script');
-  script.setAttribute('src', './prettify.js');
-  document.head.appendChild(script);
+  rCode.module.require('./prettify.js')
 };
 
 /**
@@ -478,7 +529,7 @@ rCode.UI.checkAllGeneratorFunctionsDefined = function (generator) {
 /**
  * Initialize Blockly.  Called on page load.
  */
-rCode.UI.init = function () {
+rCode.UI.init = async function () {
   rCode.UI.initLanguage();
 
   var rtl = rCode.UI.isRtl();
@@ -565,7 +616,7 @@ rCode.UI.init = function () {
   // and the infinite loop detection function.
   Blockly.JavaScript.addReservedWords('code,timeouts,checkTimeout');
 
-  rCode.UI.loadBlocks('');
+  await rCode.UI.loadBlocks('');
 
   rCode.UI.tabClick(rCode.UI.selected);
 

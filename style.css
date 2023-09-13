@@ -1,8 +1,9 @@
 html,
 body {
   height: 100%;
+  touch-action: none;
+  -ms-touch-action: none;
 }
-
 body {
   background-color: #e9f0ff;
   font-family: sans-serif;

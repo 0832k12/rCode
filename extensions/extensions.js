@@ -35,10 +35,10 @@ extensions.forEach(extension => {
             const language = extension.programmingLanguages[j];
             languageBarElement.classList.add(language);
         }
-        
-    languageBarElement.textContent = `${translations.languageSupport}: ${extension.programmingLanguages.join(', ')}`;
-    // 添加编程语言栏元素到扩展项
-    extensionItem.appendChild(languageBarElement);
+
+        languageBarElement.textContent = `${translations.languageSupport}: ${extension.programmingLanguages.join(', ')}`;
+        // 添加编程语言栏元素到扩展项
+        extensionItem.appendChild(languageBarElement);
     }
 
     const authorElement = document.createElement('p');
@@ -59,28 +59,68 @@ function getLanguageFromUrl() {
 
 function getTranslationsForLanguage(language) {
     // 在此处编写不同语言环境下的翻译文本
-    if (language === 'zh-hans') {
-        return {
-            customName: '自定义扩展',
-            customDescription: '从URL上传扩展',
-            customAuthor: '0832',
-            ConsoleName: '控制台',
-            ConsoleDescription: '控制台控制！',
-            ConsoleAuthor: '0832',
-            DivName: 'Div元素',
-            DivDescription: '控制Div元素！',
-            DivAuthor: '0832',
-            DebugName: '调试执行',
-            DebugDescription: '在代码中执行代码。',
-            DebugAuthor: '0832',
-            PROSName: 'PROS',
-            PROSDescription: '用于VEX机器人编程的扩展。',
-            PROSAuthor: '0832',
-            authorLabel: '作者',
-            languageSupport: '编译支持'
-        };
-    } else {
-        return {
+    switch (language) {
+        case 'zh-hans':
+            return {
+                customName: '自定义扩展',
+                customDescription: '从URL上传扩展',
+                customAuthor: '0832',
+                ConsoleName: '控制台',
+                ConsoleDescription: '控制台控制！',
+                ConsoleAuthor: '0832',
+                DivName: 'Div元素',
+                DivDescription: '控制Div元素！',
+                DivAuthor: '0832',
+                DebugName: '调试执行',
+                DebugDescription: '在代码中执行代码。',
+                DebugAuthor: '0832',
+                PROSName: 'PROS',
+                PROSDescription: '用于VEX机器人编程的扩展。',
+                PROSAuthor: '0832',
+                authorLabel: '作者',
+                languageSupport: '编译支持'
+            };
+        case 'zh-hant':
+            return {
+                customName: '自訂擴展',
+                customDescription: '從URL載入擴充功能',
+                customAuthor: '0832',
+                ConsoleName: '主控臺',
+                ConsoleDescription: '主控臺控制！',
+                ConsoleAuthor: '0832',
+                DivName: '區塊元素',
+                DivDescription: '控制區塊元素！',
+                DivAuthor: '0832',
+                DebugName: '調試執行',
+                DebugDescription: '在程式碼中執行程式碼。',
+                DebugAuthor: '0832',
+                PROSName: 'PROS',
+                PROSDescription: '用於VEX機器人程式設計的擴充功能。',
+                PROSAuthor: '0832',
+                authorLabel: '著者',
+                languageSupport: '編譯支援'
+            };
+        case 'ja':
+            return {
+                customName: '拡張機能',
+                customDescription: 'URLから拡張機能を読み込む',
+                customAuthor: '0832',
+                ConsoleName: 'コンソール',
+                ConsoleDescription: 'コンソールの使用！',
+                ConsoleAuthor: '0832',
+                DivName: 'ディブ（div要素）',
+                DivDescription: 'div要素を制御する！',
+                DivAuthor: '0832',
+                DebugName: 'デバッグ',
+                DebugDescription: 'コードの中でコードを実行する。',
+                DebugAuthor: '0832',
+                PROSName: 'PROS',
+                PROSDescription: 'VEXロボットの拡張機能。',
+                PROSAuthor: '0832',
+                authorLabel: '作者',
+                languageSupport: 'コンパイル　サポート'
+            };
+        default: return {
             customName: 'custom',
             customDescription: 'Load extension from URL',
             customAuthor: '0832',
@@ -98,6 +138,6 @@ function getTranslationsForLanguage(language) {
             PROSAuthor: '0832',
             authorLabel: 'Author',
             languageSupport: 'Compile support'
-        };
+        }
     }
 }

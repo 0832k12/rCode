@@ -369,7 +369,7 @@ rCode.cpp['get_analog'] = function (block) {
     return [code, rCode.cpp.ORDER_ATOMIC];
 };
 
-BlockInfo +=
+rCode.BlockInfo +=
     `<category name="${formatMessage({ id: 'name' })}" colour="230">
       <block type="include">
         <field name="HEADER">main.h</field>
